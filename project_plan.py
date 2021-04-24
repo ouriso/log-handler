@@ -1,60 +1,65 @@
 import requests
 from datetime import datetime as dt
-from sort_logs import quick_sort
-
-# models.py
-
-class UserTable:
-    fields = ('id', 'first_name', 'last_name', 'user_id')
-    pass
-
-
-class LogTable:
-    fields = ('id', 'message', 'user')
-    pass
-
+from db_settings import Base, engine, Session
+from json.decoder import JSONDecodeError
+from models import Log, User
+from sort_logs import quick_sort, sort_by_user
 
 # log_handler.py
 
+Base.metadata.create_all(engine)
+session = Session()
+
+
+def get_or_create(session, model, **kwargs):
+    instance = session.query(model).filter_by(**kwargs).first()
+    if not instance:
+        instance = model(**kwargs)
+        session.add(instance)
+        # session.commit()
+    return instance
+
+
 class LogHandler:
-    date_format = 'YYYY-mm-dd\Th:m:s' # ISO 8601
+    time_format: str = '%Y-%m-%dT%H:%M:%S'
 
     def __init__(self) -> None:
-        self._url = 'http://www.dsdev.tech/logs/'
+        self.url = 'http://www.dsdev.tech/logs/'
         pass
 
-    def date_setter(self, date: str) -> None:
-        pass
-
-    def request_maker(self, date: str) -> list:
-        request_url: str = self._url + date
+    def get_logs(self, date: str) -> list:
+        request_url: str = self.url + date
         response_data: dict = requests.get(request_url).json()
-        time_format: str = '%Y-%m-%dT%H:%M:%S'
-        if response_data.get('logs') is None:
-            return response_data.get('error')
+        logs = response_data.get('logs')
 
-        for item in response_data.get('logs'):
-            item['created_at'] = dt.strptime(
-                item['created_at'], time_format
-            )
-
-        logs = response_data['logs']
-        # print(logs[0].get('created_at'), logs[1].get('created_at'))
-        # print(logs[0].get('created_at') > logs[1].get('created_at'))
-
+        if logs is None:
+            raise KeyError(response_data.get('error'))
+        logs = self.logs_date_parser(logs)
         return logs
 
-    def data_parser(self, created_at: str) -> dict:
+    def logs_date_parser(self, logs: list) -> list:
+        for log in logs:
+            log['created_at'] = dt.strptime(
+                log['created_at'], self.time_format
+            )
+        return logs
+
+    def logs_to_db(self, logs: list) -> None:
+        logs_to_create = list()
+        for log in logs:
+            logs_to_create.append(Log(
+                date=log.get('created_at'),
+                message=log.get('message'),
+                user=get_or_create(session, User,
+                                   first_name=log.get('first_name'),
+                                   last_name=log.get('second_name'),
+                                   out_user_id=log.get('user_id'))
+            ))
+
+        session.bulk_save_objects(logs_to_create)
+        session.commit()
+        session.close()
         pass
-
-    def save_results(self) -> None:
-        pass
-
-
-# sort.py
-
-# def quick_sort(logs: list) -> list:
-#     pass
 
 
 # tests.py
@@ -69,26 +74,29 @@ class TestCases:
 - 2-3 модульных теста с мок-объектом
 """
 
-def test_sort(logs):
-    # for i in range(10):
-    #     print(logs[i]['created_at'])
-    for i in range(len(logs) - 1):
-        if logs[i]['created_at'] > logs[i+1]['created_at']:
-            break
-    else:
-        print('sorted')
+# def test_sort(logs):
+#     for i in range(len(logs) - 1):
+#         if logs[i]['created_at'] > logs[i+1]['created_at']:
+#             break
+#     else:
+#         print('sorted')
 
 
 def main():
-    date: str = input()
     log_handler: LogHandler = LogHandler()
-    logs: list = log_handler.request_maker(date)
-
-    # test_sort(logs)
+    # try:
+    date: str = input()
+    logs: list = log_handler.get_logs(date)
+    # except JSONDecodeError:
+    #     pass
+    # except KeyError as e:
+    #     print(e)
+    print(len(logs))
 
     quick_sort(logs)
 
-    # test_sort(logs)
+
+    log_handler.logs_to_db(logs)
 
 
 

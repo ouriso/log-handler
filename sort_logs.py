@@ -26,3 +26,13 @@ def quick_sort(array):
 
     _quick_sort(array, 0, len(array) - 1)
     pass
+
+
+def sort_by_user(logs: list) -> dict:
+    users_logs = dict()
+    for log in logs:
+        user_id = log['user_id']
+        item = users_logs.get(user_id, [])
+        item.append(log)
+        users_logs[user_id] = item
+    return users_logs
