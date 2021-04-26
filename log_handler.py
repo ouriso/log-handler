@@ -6,7 +6,7 @@ from sqlalchemy.orm.session import sessionmaker
 
 from db_settings import Base, engine
 from models import Log, User
-from sort_logs import quick_sort
+from utils import call_logger, quick_sort
 
 Base.metadata.create_all(engine)
 
@@ -29,6 +29,7 @@ class LogHandler:
         self.session = Session()
         pass
 
+    @call_logger
     def get_logs(self) -> str:
         logs = self.logs_date_parser(self.get_response_data())
         quick_sort(logs)
@@ -70,6 +71,9 @@ class LogHandler:
         self.session.commit()
         self.session.close()
         pass
+
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__} for date: {self.date}'
 
 
 def main():

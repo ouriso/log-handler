@@ -1,3 +1,21 @@
+import logging
+
+logging.basicConfig(
+    filename='func_calls.log',
+    format='%(asctime)s - %(message)s',
+    level=logging.INFO
+)
+
+
+def call_logger(func):
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        msg = f'Call func {func.__name__} with {args, kwargs} returns {result}'
+        logging.info(msg)
+        return msg
+    return wrapper
+
+
 def quick_sort(array):
     def partition(array, low, high):
         pivot = array[(low + high) // 2]['created_at']
