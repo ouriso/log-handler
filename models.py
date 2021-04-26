@@ -1,7 +1,8 @@
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql.schema import ForeignKey
-from db_settings import Base
 from sqlalchemy import Column, DateTime, Integer, String, Text
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql.schema import ForeignKey, UniqueConstraint
+
+from db_settings import Base
 
 
 class User(Base):
@@ -29,5 +30,10 @@ class Log(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship('User', backref='logs')
 
+    __table_args__ = (UniqueConstraint('date', 'message', 'user_id'),)
+
     def __str__(self) -> str:
+        return f'{self.date}: {self.message} by user {self.user}'
+
+    def __repr__(self) -> str:
         return f'{self.date}: {self.message} by user {self.user}'
