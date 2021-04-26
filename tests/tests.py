@@ -1,11 +1,12 @@
+import requests
 from unittest import TestCase, mock
 
 from requests.exceptions import HTTPError
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from log_handler import LogHandler
-from models import Base, Log, User
+from app.log_handler import LogHandler
+from app.models import Base, Log, User
 
 RIGHT_DATA = {
     "error": "",
@@ -84,7 +85,7 @@ class TestLogHandler(TestCase):
         self.log_handler = LogHandler('', self.engine)
         pass
 
-    @mock.patch('log_handler.requests.get')
+    @mock.patch('requests.get')
     def test_not_found(self, mock_get):
         """
         Test that HTTPError rises when status 404 returned
@@ -98,7 +99,7 @@ class TestLogHandler(TestCase):
             self.log_handler.get_response_data()
         pass
 
-    @mock.patch('log_handler.requests.get')
+    @mock.patch('requests.get')
     def test_response_error(self, mock_get):
         """
         Test that KeyError rises when status key 'logs' doesn't returned
@@ -111,7 +112,7 @@ class TestLogHandler(TestCase):
             self.log_handler.get_response_data()
         pass
 
-    @mock.patch('log_handler.requests.get')
+    @mock.patch('requests.get')
     def test_save_right_data(self, mock_get):
         """
         Test that returned logs and users saved in DB
@@ -126,7 +127,7 @@ class TestLogHandler(TestCase):
         self.assertEqual(len(logs), len(RIGHT_DATA['logs']))
         pass
 
-    @mock.patch('log_handler.requests.get')
+    @mock.patch('requests.get')
     def test_do_not_save_dublicate_user(self, mock_get):
         """
         Test that new user doesn't created if user exist in DB

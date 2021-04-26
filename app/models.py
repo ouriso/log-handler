@@ -2,7 +2,7 @@ from sqlalchemy import Column, DateTime, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey, UniqueConstraint
 
-from db_settings import Base
+from .db_settings import Base
 
 
 class User(Base):

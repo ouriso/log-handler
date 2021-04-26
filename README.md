@@ -20,9 +20,9 @@ The rest of the files perform the following functions:
 
 ## Running
 To run the app execute the file `log_handler.py` from app dir:  
-`python log_handler.py`
+`python -m app.log_handler.py`
 
 or import the Log_handler class from this file:  
-`from log_handler import Log_handler`  
+`from app.log_handler import Log_handler`  
 `instance = Log_handler(date) # str format of 'date' is '%Y-%m-%dT%H:%M:%S'`  
 `instance.get_logs()`  

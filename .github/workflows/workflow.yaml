@@ -20,4 +20,4 @@ jobs:
     - name: Lint with flake8
       run: flake8 --exclude=recipes/migrations/,users/migrations/
     - name: Run tests
-      run: python -m unittest tests/tests.py
+      run: python -m unittest

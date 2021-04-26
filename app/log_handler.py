@@ -4,9 +4,9 @@ import requests
 from requests.models import Response
 from sqlalchemy.orm.session import sessionmaker
 
-from db_settings import Base, engine
-from models import Log, User
-from utils import call_logger, quick_sort
+from .db_settings import Base, engine
+from .models import Log, User
+from .utils import call_logger, quick_sort
 
 Base.metadata.create_all(engine)
 
